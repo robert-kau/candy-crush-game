@@ -1,0 +1,7 @@
+How to generate documentation wih doxygen.
+	https://www.youtube.com/watch?v=mgVgZjaeNkw&t
+	
+Article showing how to create documentation with doxygen syntax.
+	http://fnch.users.sourceforge.net/doxygen_c.html
+	
+ 

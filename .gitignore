@@ -1,0 +1,19 @@
+ 
+#Folders for objects and executables
+obj/
+bin/
+
+# Description files
+*.pdf
+
+# Qt Creator 'pro' files
+*.pro*
+
+# Qt Creator autosave
+*.autosave*
+
+# Documentation folder
+ html/
+ 
+ # Game Log file
+ *.log
