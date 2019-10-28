@@ -1,17 +1,21 @@
+#include <ncurses.h>
+#include <stdlib.h>
+#include "inc/window.h"
+#include "inc/game_structs.h"
+#include "inc/game_controll.h"
 
-#include <math.h>
-#include <ncursesw/ncurses.h>
-
-int main(void)
+int main()
 {
-  /*InitWindow();
+  InitWindow();
 
-  Game *game = NewGame();
+  Game *game = malloc(sizeof(Game));
 
-  while(1)
+  GameInit(game);
+
+  while (1)
   {
-    GameCheckScreenMode(game);
+    GameScreenControll(game);
+  }
 
-    GameActiveScreenMode(game);
-  }*/
+  return 0;
 }

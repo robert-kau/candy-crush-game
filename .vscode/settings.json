@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "window.h": "c",
+        "game_controll.h": "c",
+        "game_menu.h": "c",
+        "enums.h": "c",
+        "game_structs.h": "c",
+        "curses.h": "c"
+    }
+}

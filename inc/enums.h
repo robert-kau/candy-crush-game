@@ -1,0 +1,12 @@
+typedef enum GameScreen
+{
+    SCREEN_MENU,
+    SCREEN_GAME,
+    SCREEN_PAUSED,
+    SCREEN_RANKING,
+    SCREEN_GAME_OVER,
+    SCREEN_GAME_COMPLETE,
+    SCREEN_SAVE_GAME,
+    SCREEN_LOAD_GAME,
+    SCREEN_EXIT_GAME,
+} GameScreen;
