@@ -9,12 +9,13 @@ static void InitWindowColors();
 
 void InitWindow()
 {
+
     srand(time(NULL));
 
-    system("resize -s 33 83");
+    // system("resize -s 33 83");
 
     // Enable the use of unicodes.
-    setlocale(LC_ALL, "en_US.utf8");
+    //setlocale(LC_ALL, "en_US.utf8");
 
     initscr();
 
@@ -53,7 +54,7 @@ WINDOW *CreateNewWindow(uint16_t lines, uint16_t columns,
                         uint16_t start_x, uint16_t start_y)
 {
     WINDOW *window;
-    window = newwin(lines, columns, start_x, start_y);
+    window = newwin(lines, columns, start_y, start_x);
     box(window, 0, 0);
 
     return window;

@@ -6,15 +6,17 @@
 
 int main()
 {
-  InitWindow();
 
   Game *game = malloc(sizeof(Game));
+  int exit_game = 0;
+
+  InitWindow();
 
   GameInit(game);
 
-  while (1)
+  while (!(exit_game))
   {
-    GameScreenControll(game);
+    exit_game = GameScreenControll(game);
   }
 
   return 0;

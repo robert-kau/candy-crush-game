@@ -1,0 +1,1 @@
+void NewGameInit(Game *game);
