@@ -1,6 +1,6 @@
 #include <ncurses.h>
 //#include "inc/game_structs.h"
 
-int GameScreenControll(Game *game);
+int GameScreenControll(GAME *game);
 
-void GameInit(Game *game);
+void GameInit(GAME *game);

@@ -1,18 +1,19 @@
 #include <ncurses.h>
 #include "inc/game_menu.h"
 #include "inc/enums.h"
-#include "inc/game_init.h"
+#include "inc/game_base.h"
 
 int a = 0;
 
-void GameInit(Game *game)
+void GameInit(GAME *game)
 {
     game->state_screen = SCREEN_MENU;
 }
 
-int GameScreenControll(Game *game)
+int GameScreenControll(GAME *game)
 {
     int exit_game = 0;
+    PLAYER *player;
 
     switch (game->state_screen)
     {
@@ -21,12 +22,8 @@ int GameScreenControll(Game *game)
         break;
 
     case SCREEN_NOVO_JOGO:
-        NewGameInit(game);
-        if (!a)
-        {
-            printf("\n\nOpcao Novo jogo\n\n");
-            a = 1;
-        }
+        player = NewGameInit(game);
+        game->state_screen = SCREEN_RUNNING;
         break;
 
     case SCREEN_CONTINUAR:
@@ -54,6 +51,15 @@ int GameScreenControll(Game *game)
             a = 1;
         }
 
+        break;
+
+    case SCREEN_RUNNING:
+        if (!a)
+        {
+            GameRunning(game, player);
+            //printf("\n\nOpcao ranking\n\n");
+            a = 1;
+        }
         break;
 
     case SCREEN_FECHAR_JOGO:

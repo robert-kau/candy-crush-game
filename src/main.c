@@ -7,7 +7,7 @@
 int main()
 {
 
-  Game *game = malloc(sizeof(Game));
+  GAME *game = malloc(sizeof(GAME));
   int exit_game = 0;
 
   InitWindow();

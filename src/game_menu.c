@@ -5,11 +5,11 @@
 
 #define ENTER 10
 
-void MenuScreen(Game *game)
+void MenuScreen(GAME *game)
 {
     char menu_list[5][20] = {"Novo Jogo", "Continuar",
                              "Ranking", "Como Jogar", "Fechar Jogo"};
-    int ch, i = 0, width = 7;
+    int ch, i = 0;
 
     game->window = CreateNewWindow(7, 22, 94, 1);
 
