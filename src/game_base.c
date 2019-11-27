@@ -4,6 +4,7 @@
 #include "inc/window.h"
 #include "inc/game_base.h"
 #include <stdlib.h>
+#include <math.h>
 
 PLAYER *NewGameInit(GAME *game)
 {
@@ -87,34 +88,17 @@ void PrintColorMatrix(GAME *game, char tabuleiro[MAP_LINES][MAP_COL])
     init_pair(BLUE, COLOR_BLACK, COLOR_BLUE);
     init_pair(YELLOW, COLOR_BLACK, COLOR_YELLOW);
 
-    //wattron(game->window, COLOR_PAIR(RED));
-    //mvwprintw(game->window, lin + 5, col + 3, "%s", " ");
-
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < PIXELS_PIECE; i++, j++)
     {
-        switch (i)
+        if (j > (sqrt(PIXELS_PIECE) - 1))
         {
-        case 0:
             j = 0;
-            k = 0;
-            break;
-        case 1:
-            j = 0;
-            k = 1;
-            break;
-        case 2:
-            j = 1;
-            k = 0;
-            break;
-        case 3:
-            j = 1;
-            k = 1;
-            break;
+            k++;
         }
 
-        for (lin = j, lin_aux = 0; lin_aux < MAP_LINES; lin_aux++, lin += PIECE_SIZE + EDGE_SIZE)
+        for (lin = j, lin_aux = 0; lin_aux < MAP_LINES; lin_aux++, lin += sqrt(PIXELS_PIECE) + SPACE_SIZE)
         {
-            for (col = k, col_aux = 0; col_aux < MAP_COL; col_aux++, col += PIECE_SIZE + EDGE_SIZE)
+            for (col = k, col_aux = 0; col_aux < MAP_COL; col_aux++, col += sqrt(PIXELS_PIECE) + SPACE_SIZE)
             {
                 switch (tabuleiro[lin_aux][col_aux])
                 {
@@ -140,7 +124,6 @@ void PrintColorMatrix(GAME *game, char tabuleiro[MAP_LINES][MAP_COL])
                     break;
                 }
             }
-            // mvwprintw(game->window, lin + 5, col + 3, "%c", tabuleiro[lin][col]);
         }
     }
 

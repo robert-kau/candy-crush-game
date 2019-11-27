@@ -11,11 +11,11 @@
 #define BLUE 4
 #define YELLOW 3
 
-#define POS_TAB_LIN 10
-#define POS_TAB_COL 50
+#define POS_TAB_LIN 15
+#define POS_TAB_COL 75
 
-#define EDGE_SIZE 0
-#define PIECE_SIZE 3
+#define SPACE_SIZE 2
+#define PIXELS_PIECE 9
 
 PLAYER *NewGameInit(GAME *game);
 
