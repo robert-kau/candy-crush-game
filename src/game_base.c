@@ -36,6 +36,7 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     ReadFileLevel(player, tabuleiro, level_info);
 
     clear();
+
     game->window = CreateNewWindow(54, 180, 15, 1);
     mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
     mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
@@ -88,6 +89,9 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
             werase(game->window);
 
             game->window = CreateNewWindow(54, 180, 15, 1);
+
+            keypad(game->window, TRUE);
+
             mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
             mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
 
