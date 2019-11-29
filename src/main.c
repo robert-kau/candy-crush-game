@@ -8,6 +8,8 @@ int main()
 {
 
   GAME *game = malloc(sizeof(GAME));
+  PLAYER *player = malloc(sizeof(PLAYER));
+  LEVEL_INFO *level_info = malloc(sizeof(LEVEL_INFO));
   int exit_game = 0;
 
   InitWindow();
@@ -16,7 +18,7 @@ int main()
 
   while (!(exit_game))
   {
-    exit_game = GameScreenControll(game);
+    exit_game = GameScreenControll(game, player, level_info);
   }
 
   return 0;

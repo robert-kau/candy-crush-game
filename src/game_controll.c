@@ -10,10 +10,9 @@ void GameInit(GAME *game)
     game->state_screen = SCREEN_MENU;
 }
 
-int GameScreenControll(GAME *game)
+int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
     int exit_game = 0;
-    PLAYER *player;
 
     switch (game->state_screen)
     {
@@ -22,17 +21,12 @@ int GameScreenControll(GAME *game)
         break;
 
     case SCREEN_NOVO_JOGO:
-        player = NewGameInit(game);
+        NewGameInit(game, player);
         game->state_screen = SCREEN_RUNNING;
         break;
 
     case SCREEN_CONTINUAR:
-        if (!a)
-        {
-            printf("\n\nOpcao continuar\n\n");
-            a = 1;
-        }
-
+        GameRunning(game, player, level_info);
         break;
 
     case SCREEN_RANKING:
@@ -54,12 +48,10 @@ int GameScreenControll(GAME *game)
         break;
 
     case SCREEN_RUNNING:
-        if (!a)
-        {
-            GameRunning(game, player);
-            //printf("\n\nOpcao ranking\n\n");
-            a = 1;
-        }
+
+        GameRunning(game, player, level_info);
+
+        game->state_screen = SCREEN_MENU;
         break;
 
     case SCREEN_FECHAR_JOGO:

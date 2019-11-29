@@ -3,6 +3,7 @@
 typedef struct Game
 {
     WINDOW *window;
+    WINDOW *matrix;
     char state_screen;
 } GAME;
 
@@ -12,3 +13,8 @@ typedef struct Player
     int score;
     int level;
 } PLAYER;
+
+typedef struct Level_Info
+{
+    int combinations_next_level;
+} LEVEL_INFO;

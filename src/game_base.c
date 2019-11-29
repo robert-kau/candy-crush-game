@@ -6,10 +6,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-PLAYER *NewGameInit(GAME *game)
+void NewGameInit(GAME *game, PLAYER *player)
 {
-    PLAYER *player = malloc(sizeof(PLAYER));
-
     echo();
 
     game->window = CreateNewWindow(7, 40, 90, 1);
@@ -27,33 +25,85 @@ PLAYER *NewGameInit(GAME *game)
 
     delwin(game->window);
     endwin();
-
-    return player;
 }
 
-void GameRunning(GAME *game, PLAYER *player)
+void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
     char tabuleiro[MAP_LINES][MAP_COL];
-    int lin, col;
+    int lin = EDGE, col = EDGE, lin_old, col_old;
+    int ch;
+
+    ReadFileLevel(player, tabuleiro, level_info);
 
     clear();
     game->window = CreateNewWindow(54, 180, 15, 1);
     mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
+    mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
     wrefresh(game->window);
 
-    ReadFileLevel(player, tabuleiro);
-    /*
-    for (lin = 0; lin < MAP_LINES; lin++)
-    {
-        for (col = 0; col < MAP_COL; col++)
-            mvwprintw(game->window, lin + 5, col + 3, "%c", tabuleiro[lin][col]);
-    }
-    wrefresh(game->window);
-*/
     PrintColorMatrix(game, tabuleiro);
+
+    PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * INIT_POS_CURSOR) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * INIT_POS_CURSOR) + POS_TAB_COL - 1));
+
+    keypad(game->window, TRUE); // enable keyboard input for the window.
+    curs_set(0);                // hide the default screen cursor.
+
+    lin_old = lin;
+    col_old = col;
+
+    while ((ch = wgetch(game->window)) != ESC)
+    {
+        switch (ch)
+        {
+        case KEY_UP:
+        case 'w':
+            if (lin > EDGE)
+                lin--;
+            break;
+
+        case KEY_DOWN:
+        case 's':
+            if (lin <= MAP_LINES - 3 * EDGE)
+                lin++;
+            break;
+
+        case 'a':
+        case KEY_LEFT:
+            if (col > EDGE)
+                col--;
+            break;
+
+        case 'd':
+        case KEY_RIGHT:
+            if (col <= MAP_COL - 3 * EDGE)
+                col++;
+            break;
+        }
+
+        if (lin_old != lin || col_old != col)
+        {
+            lin_old = lin;
+            col_old = col;
+
+            werase(game->window);
+
+            game->window = CreateNewWindow(54, 180, 15, 1);
+            mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
+            mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
+
+            PrintColorMatrix(game, tabuleiro);
+
+            PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * col) + POS_TAB_COL - 1));
+
+            wrefresh(game->window);
+        }
+    }
+
+    werase(game->window);
+    wrefresh(game->window);
 }
 
-void ReadFileLevel(PLAYER *player, char tabuleiro[MAP_LINES][MAP_COL])
+void ReadFileLevel(PLAYER *player, char tabuleiro[MAP_LINES][MAP_COL], LEVEL_INFO *level_info)
 {
     FILE *arq;
     char name_file[150];
@@ -66,12 +116,18 @@ void ReadFileLevel(PLAYER *player, char tabuleiro[MAP_LINES][MAP_COL])
         printf("\n\nErro ao abrir arquivo.\n\n");
     else
     {
-        fscanf(arq, "%s\n", time);
+        fscanf(arq, "%s", time);
+        level_info->combinations_next_level = atoi(time);
         for (lin = 0; lin < MAP_LINES; lin++)
         {
             for (col = 0; col < MAP_COL; col++)
-                if (!fscanf(arq, "%c", &tabuleiro[lin][col]))
-                    break;
+                if (fscanf(arq, "%c", &tabuleiro[lin][col]) > 0)
+                {
+                    if (tabuleiro[lin][col] == '\n')
+                        col--;
+                }
+                else
+                    printf("\nErro na leitura!!\n");
         }
     }
 }
@@ -126,6 +182,30 @@ void PrintColorMatrix(GAME *game, char tabuleiro[MAP_LINES][MAP_COL])
             }
         }
     }
+    wrefresh(game->window);
+}
 
+void PrintCursorMatrix(GAME *game, int lin, int col)
+{
+    int lin_aux, col_aux;
+
+    start_color();
+
+    init_pair(WHITE, COLOR_BLACK, COLOR_WHITE);
+
+    wattron(game->window, COLOR_PAIR(WHITE));
+
+    for (lin_aux = lin; lin_aux < (lin + (sqrt(PIXELS_PIECE) + SPACE_SIZE)); lin_aux++)
+    {
+        for (col_aux = col; col_aux < (col + (sqrt(PIXELS_PIECE) + SPACE_SIZE)); col_aux++)
+        {
+            if (lin_aux >= lin + 1 && lin_aux <= lin + 4 && (col_aux == col || col_aux == col + 5))
+                mvwprintw(game->window, lin_aux, col_aux, "%s", " ");
+            else if (lin_aux == lin)
+                mvwprintw(game->window, lin_aux, col_aux, "%s", " ");
+            else if (lin_aux == lin + 4)
+                mvwprintw(game->window, lin_aux, col_aux, "%s", " ");
+        }
+    }
     wrefresh(game->window);
 }
