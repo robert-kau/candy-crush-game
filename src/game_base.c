@@ -5,7 +5,8 @@
 #include "inc/game_base.h"
 #include <stdlib.h>
 #include <math.h>
-#include <unistd.h>
+#include <time.h>
+#include "inc/manager_keyboard.h"
 
 void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
@@ -55,7 +56,7 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     keypad(game->window, TRUE); // enable keyboard input for the window.
     curs_set(0);                // hide the default screen cursor.
 
-    while ((level_info->ch = wgetch(game->window)) != ESC)
+        while ((level_info->ch = wgetch(game->window)) != ESC)
     {
         switch (level_info->ch)
         {
@@ -95,6 +96,7 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                 FindCombinationMatrix(game, player, level_info);
             }
 
+            FindCombinationMatrix(game, player, level_info);
             level_info->first_select_col = level_info->col;
             level_info->first_select_lin = level_info->lin;
             UpdateMatrixScreen(game, player, level_info);
@@ -242,6 +244,7 @@ void UpdateMatrixScreen(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     mvwprintw(game->window, 7, 8, "Lin-col: %c", level_info->tabuleiro[level_info->lin][level_info->col]);
     mvwprintw(game->window, 8, 8, "Lin-col-first: %c", level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col]);
     mvwprintw(game->window, 9, 8, "combin: %d", level_info->n_combintions);
+    mvwprintw(game->window, 10, 8, "time: %d", time(NULL));
 
     PrintColorMatrix(game, level_info->tabuleiro);
 
@@ -272,15 +275,16 @@ void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     for (lin = EDGE; lin < MAP_LINES - EDGE; lin++)
         for (col = EDGE; col < MAP_COL - EDGE * 3; col++)
         {
-            if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 1])
-                if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 2])
-                {
-                    level_info->tabuleiro[lin][col] = 'Z';
-                    level_info->tabuleiro[lin][col + 1] = 'Z';
-                    level_info->tabuleiro[lin][col + 2] = 'Z';
-                    level_info->n_combintions++;
-                    CompleteMatrix(game, player, level_info);
-                }
+            if (level_info->tabuleiro[lin][col] != 'Z')
+                if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 1])
+                    if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 2])
+                    {
+                        level_info->tabuleiro[lin][col] = 'Z';
+                        level_info->tabuleiro[lin][col + 1] = 'Z';
+                        level_info->tabuleiro[lin][col + 2] = 'Z';
+                        level_info->n_combintions++;
+                        CompleteMatrix(game, player, level_info);
+                    }
         }
 }
 
@@ -299,10 +303,36 @@ void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                     level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
                     level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
 
+                    //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+
                     UpdateMatrixScreen(game, player, level_info);
 
-                    delay_output(10);
+                    delay_output(250);
                 }
+                level_info->tabuleiro[lin_aux2][col] = RandomPiece();
             }
         }
+    FindCombinationMatrix(game, player, level_info);
+}
+
+char RandomPiece(void)
+{
+    int n_rand;
+    char rand_piece;
+
+    n_rand = MIN + (rand() % (MAX - MIN + 1));
+
+    if (n_rand < 250)
+        rand_piece = 'R';
+
+    if (250 <= n_rand && n_rand < 500)
+        rand_piece = 'G';
+
+    if (500 <= n_rand && n_rand < 750)
+        rand_piece = 'B';
+
+    if (750 <= n_rand && n_rand < 1000)
+        rand_piece = 'C';
+
+    return rand_piece;
 }

@@ -24,6 +24,9 @@
 #define ESC 27
 #define SPACE 32
 
+#define MAX 1000
+#define MIN 0
+
 void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
 void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
@@ -43,3 +46,5 @@ void ChangePositionInMatrix(LEVEL_INFO *level_info);
 void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
 void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
+
+char RandomPiece(void);
