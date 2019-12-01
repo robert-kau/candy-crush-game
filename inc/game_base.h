@@ -19,16 +19,27 @@
 #define SPACE_SIZE 2
 #define PIXELS_PIECE 16
 
-#define INIT_POS_CURSOR 1
+#define INIT_POS_CURSOR 2
 
 #define ESC 27
+#define SPACE 32
 
-void NewGameInit(GAME *game, PLAYER *player);
+void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
 void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
-void ReadFileLevel(PLAYER *player, char tabuleiro[][MAP_COL], LEVEL_INFO *level_info);
+void ReadFileLevel(PLAYER *player, LEVEL_INFO *level_info);
 
 void PrintColorMatrix(GAME *game, char tabuleiro[][MAP_COL]);
 
 void PrintCursorMatrix(GAME *game, int lin, int col);
+
+void UpdateMatrixScreen(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
+
+void UpdateCursorMatrix(GAME *game, LEVEL_INFO *level_info);
+
+void ChangePositionInMatrix(LEVEL_INFO *level_info);
+
+void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
+
+void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info);

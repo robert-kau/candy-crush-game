@@ -5,8 +5,9 @@
 #include "inc/game_base.h"
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
 
-void NewGameInit(GAME *game, PLAYER *player)
+void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
     echo();
 
@@ -23,18 +24,23 @@ void NewGameInit(GAME *game, PLAYER *player)
 
     noecho();
 
+    level_info->lin = EDGE + 1;
+    level_info->col = EDGE + 1;
+
+    level_info->lin_old = level_info->lin;
+    level_info->col_old = level_info->col;
+
+    level_info->lin = INIT_POS_CURSOR;
+    level_info->col = INIT_POS_CURSOR;
+
+    ReadFileLevel(player, level_info);
+
     delwin(game->window);
     endwin();
 }
 
 void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
-    char tabuleiro[MAP_LINES][MAP_COL];
-    int lin = EDGE, col = EDGE, lin_old, col_old;
-    int ch;
-
-    ReadFileLevel(player, tabuleiro, level_info);
-
     clear();
 
     game->window = CreateNewWindow(54, 180, 15, 1);
@@ -42,64 +48,70 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
     wrefresh(game->window);
 
-    PrintColorMatrix(game, tabuleiro);
+    PrintColorMatrix(game, level_info->tabuleiro);
 
-    PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * INIT_POS_CURSOR) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * INIT_POS_CURSOR) + POS_TAB_COL - 1));
+    PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->col) + POS_TAB_COL - 1));
 
     keypad(game->window, TRUE); // enable keyboard input for the window.
     curs_set(0);                // hide the default screen cursor.
 
-    lin_old = lin;
-    col_old = col;
-
-    while ((ch = wgetch(game->window)) != ESC)
+    while ((level_info->ch = wgetch(game->window)) != ESC)
     {
-        switch (ch)
+        switch (level_info->ch)
         {
         case KEY_UP:
         case 'w':
-            if (lin > EDGE)
-                lin--;
+            if (level_info->lin > EDGE)
+                level_info->lin--;
             break;
 
         case KEY_DOWN:
         case 's':
-            if (lin <= MAP_LINES - 3 * EDGE)
-                lin++;
+            if (level_info->lin <= MAP_LINES - 3 * EDGE)
+                level_info->lin++;
             break;
 
         case 'a':
         case KEY_LEFT:
-            if (col > EDGE)
-                col--;
+            if (level_info->col > EDGE)
+                level_info->col--;
             break;
 
         case 'd':
         case KEY_RIGHT:
-            if (col <= MAP_COL - 3 * EDGE)
-                col++;
+            if (level_info->col <= MAP_COL - 3 * EDGE)
+                level_info->col++;
+            break;
+        case SPACE:
+            level_info->n_space++;
+
+            if (level_info->n_space >= 2)
+            {
+                level_info->n_space = 0;
+                ChangePositionInMatrix(level_info);
+                UpdateMatrixScreen(game, player, level_info);
+                UpdateCursorMatrix(game, level_info);
+
+                FindCombinationMatrix(game, player, level_info);
+            }
+
+            level_info->first_select_col = level_info->col;
+            level_info->first_select_lin = level_info->lin;
+            UpdateMatrixScreen(game, player, level_info);
+            UpdateCursorMatrix(game, level_info);
+
             break;
         }
 
-        if (lin_old != lin || col_old != col)
+        if (level_info->lin_old != level_info->lin || level_info->col_old != level_info->col)
         {
-            lin_old = lin;
-            col_old = col;
+            level_info->lin_old = level_info->lin;
+            level_info->col_old = level_info->col;
 
-            werase(game->window);
+            UpdateMatrixScreen(game, player, level_info);
 
-            game->window = CreateNewWindow(54, 180, 15, 1);
-
-            keypad(game->window, TRUE);
-
-            mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
-            mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
-
-            PrintColorMatrix(game, tabuleiro);
-
-            PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * col) + POS_TAB_COL - 1));
-
-            wrefresh(game->window);
+            if (level_info->n_space > 0)
+                UpdateCursorMatrix(game, level_info);
         }
     }
 
@@ -107,7 +119,7 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     wrefresh(game->window);
 }
 
-void ReadFileLevel(PLAYER *player, char tabuleiro[MAP_LINES][MAP_COL], LEVEL_INFO *level_info)
+void ReadFileLevel(PLAYER *player, LEVEL_INFO *level_info)
 {
     FILE *arq;
     char name_file[150];
@@ -125,9 +137,9 @@ void ReadFileLevel(PLAYER *player, char tabuleiro[MAP_LINES][MAP_COL], LEVEL_INF
         for (lin = 0; lin < MAP_LINES; lin++)
         {
             for (col = 0; col < MAP_COL; col++)
-                if (fscanf(arq, "%c", &tabuleiro[lin][col]) > 0)
+                if (fscanf(arq, "%c", &level_info->tabuleiro[lin][col]) > 0)
                 {
-                    if (tabuleiro[lin][col] == '\n')
+                    if (level_info->tabuleiro[lin][col] == '\n')
                         col--;
                 }
                 else
@@ -212,4 +224,85 @@ void PrintCursorMatrix(GAME *game, int lin, int col)
         }
     }
     wrefresh(game->window);
+}
+
+void UpdateMatrixScreen(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
+{
+    werase(game->window);
+
+    game->window = CreateNewWindow(54, 180, 15, 1);
+
+    keypad(game->window, TRUE);
+
+    mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
+    mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
+    mvwprintw(game->window, 4, 8, "Linha: %d", level_info->lin);
+    mvwprintw(game->window, 5, 8, "Coluna: %d", level_info->col);
+    mvwprintw(game->window, 6, 8, "Space: %d", level_info->n_space);
+    mvwprintw(game->window, 7, 8, "Lin-col: %c", level_info->tabuleiro[level_info->lin][level_info->col]);
+    mvwprintw(game->window, 8, 8, "Lin-col-first: %c", level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col]);
+    mvwprintw(game->window, 9, 8, "combin: %d", level_info->n_combintions);
+
+    PrintColorMatrix(game, level_info->tabuleiro);
+
+    PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->col) + POS_TAB_COL - 1));
+
+    wrefresh(game->window);
+}
+
+void UpdateCursorMatrix(GAME *game, LEVEL_INFO *level_info)
+{
+    PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->first_select_lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->first_select_col) + POS_TAB_COL - 1));
+}
+
+void ChangePositionInMatrix(LEVEL_INFO *level_info)
+{
+    char aux_piece;
+
+    aux_piece = level_info->tabuleiro[level_info->lin][level_info->col];
+
+    level_info->tabuleiro[level_info->lin][level_info->col] = level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col];
+
+    level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col] = aux_piece;
+}
+
+void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
+{
+    int lin, col;
+    for (lin = EDGE; lin < MAP_LINES - EDGE; lin++)
+        for (col = EDGE; col < MAP_COL - EDGE * 3; col++)
+        {
+            if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 1])
+                if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 2])
+                {
+                    level_info->tabuleiro[lin][col] = 'Z';
+                    level_info->tabuleiro[lin][col + 1] = 'Z';
+                    level_info->tabuleiro[lin][col + 2] = 'Z';
+                    level_info->n_combintions++;
+                    CompleteMatrix(game, player, level_info);
+                }
+        }
+}
+
+void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
+{
+    int lin, col, lin_aux = 0, lin_aux2 = 0, aux_piece;
+
+    for (col = EDGE; col < MAP_COL - EDGE; col++)
+        for (lin = MAP_LINES - 1 - 1; lin >= EDGE; lin--)
+        {
+            if (level_info->tabuleiro[lin][col] == 'Z')
+            {
+                for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
+                {
+                    aux_piece = level_info->tabuleiro[lin_aux2][col];
+                    level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+                    level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
+
+                    UpdateMatrixScreen(game, player, level_info);
+
+                    delay_output(10);
+                }
+            }
+        }
 }

@@ -21,12 +21,12 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_NOVO_JOGO:
-        NewGameInit(game, player);
+        NewGameInit(game, player, level_info);
         game->state_screen = SCREEN_RUNNING;
         break;
 
     case SCREEN_CONTINUAR:
-        GameRunning(game, player, level_info);
+        game->state_screen = SCREEN_RUNNING;
         break;
 
     case SCREEN_RANKING:

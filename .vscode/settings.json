@@ -5,6 +5,9 @@
         "game_menu.h": "c",
         "enums.h": "c",
         "game_structs.h": "c",
-        "curses.h": "c"
+        "curses.h": "c",
+        "unistd.h": "c",
+        "math.h": "c",
+        "stdlib.h": "c"
     }
 }
