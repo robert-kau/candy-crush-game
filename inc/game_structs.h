@@ -5,7 +5,6 @@
 typedef struct Game
 {
     WINDOW *window;
-    WINDOW *matrix;
     char state_screen;
 } GAME;
 
@@ -29,4 +28,8 @@ typedef struct Level_Info
     char tabuleiro[MAP_LINES][MAP_COL];
     int n_space;
     int n_combintions;
+    int time_start;
+    int time_left;
+    int time_calib;
+    int time_rest;
 } LEVEL_INFO;

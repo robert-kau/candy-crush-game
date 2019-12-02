@@ -10,38 +10,55 @@
 
 void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
-    echo();
 
-    game->window = CreateNewWindow(7, 40, 90, 1);
+    if (game->state_screen == SCREEN_NOVO_JOGO)
+    {
+        echo();
 
-    mvwprintw(game->window, 2, 8, "Digite o nome do jogador");
-    mvwprintw(game->window, 4, 2, "->");
-    wrefresh(game->window);
+        game->window = CreateNewWindow(7, 40, 90, 1);
+        mvwprintw(game->window, 2, 8, "Digite o nome do jogador");
+        mvwprintw(game->window, 4, 2, "->");
+        wrefresh(game->window);
 
-    mvwgetnstr(game->window, 4, 5, player->name, MAX_LENGTH_PLAYER_NAME);
+        mvwgetnstr(game->window, 4, 5, player->name, MAX_LENGTH_PLAYER_NAME);
 
-    player->level = INITIAL_LEVEL;
-    player->score = INITIAL_SCORE;
+        noecho();
 
-    noecho();
-
-    level_info->lin = EDGE + 1;
-    level_info->col = EDGE + 1;
-
-    level_info->lin_old = level_info->lin;
-    level_info->col_old = level_info->col;
+        player->level = INITIAL_LEVEL;
+        player->score = INITIAL_SCORE;
+    }
 
     level_info->lin = INIT_POS_CURSOR;
     level_info->col = INIT_POS_CURSOR;
 
+    level_info->lin_old = level_info->lin;
+    level_info->col_old = level_info->col;
+
     ReadFileLevel(player, level_info);
+
+    level_info->time_start = time(NULL);
+
+    level_info->time_calib = 0;
+
+    level_info->n_space = 0;
+
+    level_info->n_combintions = 0;
 
     delwin(game->window);
     endwin();
 }
 
-void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
+int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
+    if (level_info->time_calib > 0)
+    {
+        level_info->time_start = time(NULL);
+
+        level_info->time_rest = (TIME_FIRST_LEVEL + (player->level * TIME_OTHER_LEVEL)) - level_info->time_calib;
+
+        level_info->time_start -= level_info->time_rest;
+    }
+
     clear();
 
     game->window = CreateNewWindow(54, 180, 15, 1);
@@ -56,8 +73,15 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     keypad(game->window, TRUE); // enable keyboard input for the window.
     curs_set(0);                // hide the default screen cursor.
 
-        while ((level_info->ch = wgetch(game->window)) != ESC)
+    nodelay(game->window, TRUE);
+
+    UpdateTime(game, level_info, player);
+
+    while (((level_info->ch = wgetch(game->window)) != ESC) && level_info->time_left > 0 &&
+           level_info->n_combintions < level_info->combinations_next_level)
     {
+        UpdateTime(game, level_info, player);
+
         switch (level_info->ch)
         {
         case KEY_UP:
@@ -115,10 +139,19 @@ void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
             if (level_info->n_space > 0)
                 UpdateCursorMatrix(game, level_info);
         }
+        nodelay(game->window, TRUE);
     }
 
     werase(game->window);
     wrefresh(game->window);
+    level_info->time_calib = level_info->time_left;
+
+    if (level_info->time_left <= 0)
+        return GAME_TIMEOUT;
+    else if (level_info->n_combintions >= level_info->combinations_next_level)
+        return GAME_LEVEL_FINISHED;
+    else
+        return GAME_PAUSE;
 }
 
 void ReadFileLevel(PLAYER *player, LEVEL_INFO *level_info)
@@ -238,17 +271,18 @@ void UpdateMatrixScreen(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 
     mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
     mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
-    mvwprintw(game->window, 4, 8, "Linha: %d", level_info->lin);
-    mvwprintw(game->window, 5, 8, "Coluna: %d", level_info->col);
-    mvwprintw(game->window, 6, 8, "Space: %d", level_info->n_space);
-    mvwprintw(game->window, 7, 8, "Lin-col: %c", level_info->tabuleiro[level_info->lin][level_info->col]);
-    mvwprintw(game->window, 8, 8, "Lin-col-first: %c", level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col]);
-    mvwprintw(game->window, 9, 8, "combin: %d", level_info->n_combintions);
-    mvwprintw(game->window, 10, 8, "time: %d", time(NULL));
+    //mvwprintw(game->window, 4, 8, "Linha: %d", level_info->lin);
+    //mvwprintw(game->window, 5, 8, "Coluna: %d", level_info->col);
+    //mvwprintw(game->window, 6, 8, "Space: %d", level_info->n_space);
+    //mvwprintw(game->window, 7, 8, "Lin-col: %c", level_info->tabuleiro[level_info->lin][level_info->col]);
+    //mvwprintw(game->window, 8, 8, "Lin-col-first: %c", level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col]);
+    mvwprintw(game->window, 9, 8, "Combinacoe feitas: %d", level_info->n_combintions);
 
     PrintColorMatrix(game, level_info->tabuleiro);
 
     PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->col) + POS_TAB_COL - 1));
+
+    UpdateTime(game, level_info, player);
 
     wrefresh(game->window);
 }
@@ -335,4 +369,42 @@ char RandomPiece(void)
         rand_piece = 'C';
 
     return rand_piece;
+}
+
+int UpdateTime(GAME *game, LEVEL_INFO *level_info, PLAYER *player)
+{
+    int time_aux, there_is_time, time_aux2;
+
+    time_aux = (level_info->time_start + TIME_FIRST_LEVEL + (player->level * TIME_OTHER_LEVEL)) - time(NULL);
+
+    if (time_aux >= 0)
+    {
+        level_info->time_left = time_aux;
+        there_is_time = 1;
+    }
+    else
+        there_is_time = 0;
+
+    if (game->state_screen == SCREEN_RUNNING)
+    {
+        mvwprintw(game->window, 10, 8, "Tempo restante: %3ds", level_info->time_left);
+        //mvwprintw(game->window, 11, 8, "Tempo r: %3ds", level_info->time_rest);
+        wrefresh(game->window);
+    }
+
+    return there_is_time;
+}
+
+int CalculateScore(LEVEL_INFO *level_info, PLAYER *player)
+{
+    int seconds, points;
+
+    seconds = TIME_FIRST_LEVEL + (player->level * TIME_OTHER_LEVEL) - level_info->time_left;
+
+    points = (level_info->n_combintions * POINTS_FOR_COMB) - (POINTS_FOR_S * seconds);
+
+    if (points < 0)
+        points = 0;
+
+    return points;
 }

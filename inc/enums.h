@@ -10,4 +10,14 @@ typedef enum GameScreen
     SCREEN_SAVE_GAME,
     SCREEN_LOAD_GAME,
     SCREEN_EXIT_GAME,
+    SCREEN_LEVEL_FINISHED,
+    SCREEN_GAME_OVER,
+    SCREEN_WINNER,
 } GameScreen;
+
+typedef enum GameState
+{
+    GAME_TIMEOUT,
+    GAME_LEVEL_FINISHED,
+    GAME_PAUSE,
+} GameState;

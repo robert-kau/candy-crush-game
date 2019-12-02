@@ -31,7 +31,6 @@ void InitWindow()
     cbreak();
 
     scrollok(stdscr, TRUE);
-    nodelay(stdscr, TRUE);
 
     refresh();
 }

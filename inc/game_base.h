@@ -14,7 +14,7 @@
 #define WHITE 7
 
 #define POS_TAB_LIN 10
-#define POS_TAB_COL 75
+#define POS_TAB_COL 60
 
 #define SPACE_SIZE 2
 #define PIXELS_PIECE 16
@@ -27,9 +27,15 @@
 #define MAX 1000
 #define MIN 0
 
+#define TIME_FIRST_LEVEL 120
+#define TIME_OTHER_LEVEL 60
+
+#define POINTS_FOR_S 10
+#define POINTS_FOR_COMB 10
+
 void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
-void GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
+int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
 void ReadFileLevel(PLAYER *player, LEVEL_INFO *level_info);
 
@@ -48,3 +54,7 @@ void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
 char RandomPiece(void);
+
+int UpdateTime(GAME *game, LEVEL_INFO *level_info, PLAYER *player);
+
+int CalculateScore(LEVEL_INFO *level_info, PLAYER *player);
