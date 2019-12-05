@@ -23,6 +23,7 @@
 
 #define ESC 27
 #define SPACE 32
+#define EMPTY 'Z'
 
 #define MAX 1000
 #define MIN 0

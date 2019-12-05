@@ -21,5 +21,9 @@ int main()
     exit_game = GameScreenControll(game, player, level_info);
   }
 
+  free(game);
+  free(player);
+  free(level_info);
+
   return 0;
 }

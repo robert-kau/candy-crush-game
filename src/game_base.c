@@ -77,6 +77,7 @@ int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 
     UpdateTime(game, level_info, player);
 
+    //while (1)
     while (((level_info->ch = wgetch(game->window)) != ESC) && level_info->time_left > 0 &&
            level_info->n_combintions < level_info->combinations_next_level)
     {
@@ -309,25 +310,71 @@ void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     for (lin = EDGE; lin < MAP_LINES - EDGE; lin++)
         for (col = EDGE; col < MAP_COL - EDGE * 3; col++)
         {
-            if (level_info->tabuleiro[lin][col] != 'Z')
+            if (level_info->tabuleiro[lin][col] != EMPTY)
                 if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 1])
                     if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin][col + 2])
                     {
-                        level_info->tabuleiro[lin][col] = 'Z';
-                        level_info->tabuleiro[lin][col + 1] = 'Z';
-                        level_info->tabuleiro[lin][col + 2] = 'Z';
+                        level_info->tabuleiro[lin][col] = EMPTY;
+                        level_info->tabuleiro[lin][col + 1] = EMPTY;
+                        level_info->tabuleiro[lin][col + 2] = EMPTY;
                         level_info->n_combintions++;
                         CompleteMatrix(game, player, level_info);
+                    }
+        }
+
+    for (col = EDGE; col < MAP_COL - EDGE; col++)
+        for (lin = EDGE; lin < MAP_LINES - EDGE * 3; lin++)
+        {
+            if (level_info->tabuleiro[lin][col] != EMPTY)
+                if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin + 1][col])
+                    if (level_info->tabuleiro[lin][col] == level_info->tabuleiro[lin + 2][col])
+                    {
+                        level_info->tabuleiro[lin][col] = EMPTY;
+                        level_info->tabuleiro[lin + 1][col] = EMPTY;
+                        level_info->tabuleiro[lin + 2][col] = EMPTY;
+                        level_info->n_combintions++;
+                        CompleteMatrix(game, player, level_info);
+                        //CompleteMatrix(game, player, level_info);
                     }
         }
 }
 
 void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
-    int lin, col, lin_aux = 0, lin_aux2 = 0, aux_piece;
+    int lin, col, lin_aux = 0, lin_aux2 = 0, aux_piece, flag_empty = 1;
 
     for (col = EDGE; col < MAP_COL - EDGE; col++)
-        for (lin = MAP_LINES - 1 - 1; lin >= EDGE; lin--)
+    {
+        do
+        {
+            flag_empty = 0;
+            for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
+            {
+                if (level_info->tabuleiro[lin][col] == EMPTY)
+                {
+                    for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
+                    {
+                        aux_piece = level_info->tabuleiro[lin_aux2][col];
+                        level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+                        level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
+
+                        //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+
+                        UpdateMatrixScreen(game, player, level_info);
+
+                        delay_output(250);
+                    }
+                    level_info->tabuleiro[lin_aux2][col] = RandomPiece();
+                }
+            }
+
+            for (lin = EDGE; lin < MAP_LINES; lin++)
+                if (level_info->tabuleiro[lin][col] == EMPTY)
+                    flag_empty = 1;
+
+        } while (flag_empty);
+        /*
+        for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
         {
             if (level_info->tabuleiro[lin][col] == 'Z')
             {
@@ -346,6 +393,47 @@ void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                 level_info->tabuleiro[lin_aux2][col] = RandomPiece();
             }
         }
+
+        for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
+        {
+            if (level_info->tabuleiro[lin][col] == 'Z')
+            {
+                for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
+                {
+                    aux_piece = level_info->tabuleiro[lin_aux2][col];
+                    level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+                    level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
+
+                    //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+
+                    UpdateMatrixScreen(game, player, level_info);
+
+                    delay_output(250);
+                }
+                level_info->tabuleiro[lin_aux2][col] = RandomPiece();
+            }
+        }
+
+        for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
+        {
+            if (level_info->tabuleiro[lin][col] == 'Z')
+            {
+                for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
+                {
+                    aux_piece = level_info->tabuleiro[lin_aux2][col];
+                    level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+                    level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
+
+                    //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
+
+                    UpdateMatrixScreen(game, player, level_info);
+
+                    delay_output(250);
+                }
+                level_info->tabuleiro[lin_aux2][col] = RandomPiece();
+            }
+        }*/
+    }
     FindCombinationMatrix(game, player, level_info);
 }
 

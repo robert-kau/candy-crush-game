@@ -11,6 +11,11 @@ void MenuScreen(GAME *game)
                              "Ranking", "Como Jogar", "Fechar Jogo"};
     int ch, i = 0;
 
+    clear();
+
+    werase(game->window);
+    wrefresh(game->window);
+
     game->window = CreateNewWindow(7, 22, 94, 1);
 
     // now print all the menu items and highlight the first one
