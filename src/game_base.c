@@ -274,7 +274,7 @@ void UpdateMatrixScreen(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
     //mvwprintw(game->window, 4, 8, "Linha: %d", level_info->lin);
     //mvwprintw(game->window, 5, 8, "Coluna: %d", level_info->col);
-    //mvwprintw(game->window, 6, 8, "Space: %d", level_info->n_space);
+    mvwprintw(game->window, 6, 8, "Score: %d", CalculateScore(level_info, player));
     //mvwprintw(game->window, 7, 8, "Lin-col: %c", level_info->tabuleiro[level_info->lin][level_info->col]);
     //mvwprintw(game->window, 8, 8, "Lin-col-first: %c", level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col]);
     mvwprintw(game->window, 9, 8, "Combinacoe feitas: %d", level_info->n_combintions);
@@ -489,10 +489,14 @@ int CalculateScore(LEVEL_INFO *level_info, PLAYER *player)
 
     seconds = TIME_FIRST_LEVEL + (player->level * TIME_OTHER_LEVEL) - level_info->time_left;
 
-    points = (level_info->n_combintions * POINTS_FOR_COMB) - (POINTS_FOR_S * seconds);
+    points = 5000 + (level_info->n_combintions * POINTS_FOR_COMB) - (POINTS_FOR_S * seconds);
 
     if (points < 0)
         points = 0;
 
+    if (points >= 5000)
+        points = 5000;
+
     return points;
+    //return seconds;
 }

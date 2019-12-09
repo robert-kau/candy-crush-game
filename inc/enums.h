@@ -21,3 +21,13 @@ typedef enum GameState
     GAME_LEVEL_FINISHED,
     GAME_PAUSE,
 } GameState;
+
+typedef enum FileState
+{
+    OPENING_ERROR,
+    CREATED_FILE,
+    CREATED_FILE_FAILL,
+    WRITING_ERROR,
+    READING_ERROR,
+    EVERYTHING_OK
+} FileState;

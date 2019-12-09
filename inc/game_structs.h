@@ -2,18 +2,19 @@
 #define MAP_LINES 7
 #define MAP_COL 11
 
-typedef struct Game
-{
-    WINDOW *window;
-    char state_screen;
-} GAME;
-
 typedef struct Player
 {
     char name[MAX_LENGTH_PLAYER_NAME];
     int score;
     int level;
 } PLAYER;
+
+typedef struct Game
+{
+    WINDOW *window;
+    char state_screen;
+    PLAYER ranking[10];
+} GAME;
 
 typedef struct Level_Info
 {

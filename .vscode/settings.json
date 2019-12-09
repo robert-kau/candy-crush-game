@@ -8,6 +8,7 @@
         "curses.h": "c",
         "unistd.h": "c",
         "math.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "ranking.h": "c"
     }
 }

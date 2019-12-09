@@ -4,6 +4,7 @@
 #include "inc/game_base.h"
 #include "inc/game_controll.h"
 #include "inc/window.h"
+#include "inc/ranking.h"
 
 #define ENTER 10
 
@@ -16,6 +17,7 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     switch (game->state_screen)
     {
     case SCREEN_MENU:
+        // SaveRankingFile(game);
         MenuScreen(game);
         break;
 
@@ -32,12 +34,10 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_RANKING:
-        if (!a)
-        {
-            printf("\n\nOpcao ranking\n\n");
-            a = 1;
-        }
-
+        if (ReadRankingFile(game) == CREATED_FILE)
+            InitRanking(game);
+        PrintRankingFile(game);
+        game->state_screen = SCREEN_MENU;
         break;
 
     case SCREEN_COMO_JOGAR:
@@ -68,6 +68,8 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     case SCREEN_LEVEL_FINISHED:
 
         player->score += CalculateScore(level_info, player);
+        //player->score = 12;
+        AddPlayerRanking(player, level_info, game);
 
         if (player->level < MAX_LEVELS - 1)
         {
@@ -88,6 +90,7 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_GAME_OVER:
+        AddPlayerRanking(player, level_info, game);
         PrintScreenGameOver(game);
         game->state_screen = SCREEN_MENU;
         break;
