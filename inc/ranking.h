@@ -8,6 +8,6 @@ void PrintRankingFile(GAME *game);
 
 FileState SaveRankingFile(GAME *game);
 
-void AddPlayerRanking(PLAYER *player, LEVEL_INFO *level_info, GAME *game);
+void AddPlayerRanking(PLAYER *player, GAME *game);
 
 void RankingSort(GAME *game);

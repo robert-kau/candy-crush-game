@@ -18,28 +18,27 @@ void MenuScreen(GAME *game)
 
     game->window = CreateNewWindow(7, 22, 94, 1);
 
-    // now print all the menu items and highlight the first one
     for (i = 0; i < 5; i++)
     {
         if (i == 0)
-            wattron(game->window, A_STANDOUT); // highlights the first item.
+            wattron(game->window, A_STANDOUT);
         else
             wattroff(game->window, A_STANDOUT);
 
         mvwprintw(game->window, i + 1, 2, "%s", menu_list[i]);
     }
 
-    wrefresh(game->window); // update the terminal screen
+    wrefresh(game->window);
 
     i = 0;
-    ///noecho();        // disable echoing of characters on the screen
-    keypad(game->window, TRUE); // enable keyboard input for the window.
-    curs_set(0);                // hide the default screen cursor.
+
+    keypad(game->window, TRUE);
+    curs_set(0);
 
     while ((ch = wgetch(game->window)) != ENTER)
     {
         mvwprintw(game->window, i + 1, 2, "%s", menu_list[i]);
-        // use a variable to increment or decrement the value based on the input.
+
         switch (ch)
         {
         case KEY_UP:
@@ -53,7 +52,7 @@ void MenuScreen(GAME *game)
             i = (i > 4) ? 0 : i;
             break;
         }
-        // now highlight the next item in the list.
+
         wattron(game->window, A_STANDOUT);
 
         mvwprintw(game->window, i + 1, 2, "%s", menu_list[i]);

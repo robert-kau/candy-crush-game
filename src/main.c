@@ -19,9 +19,7 @@ int main()
   GameInit(game);
 
   while (!(exit_game))
-  {
     exit_game = GameScreenControll(game, player, level_info);
-  }
 
   free(game);
   free(player);

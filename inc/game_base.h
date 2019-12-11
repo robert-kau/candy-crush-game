@@ -34,6 +34,8 @@
 #define POINTS_FOR_S 10
 #define POINTS_FOR_COMB 10
 
+#define INIT_SCORE_LEVEL 5000
+
 void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info);
 
 int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info);

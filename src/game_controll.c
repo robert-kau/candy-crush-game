@@ -17,7 +17,6 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     switch (game->state_screen)
     {
     case SCREEN_MENU:
-        // SaveRankingFile(game);
         MenuScreen(game);
         break;
 
@@ -31,6 +30,8 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
             game->state_screen = SCREEN_RUNNING;
         else if (ReadSavedGame(game, player, level_info))
             game->state_screen = SCREEN_RUNNING;
+        else
+            game->state_screen = SCREEN_MENU;
         break;
 
     case SCREEN_RANKING:
@@ -41,12 +42,8 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_COMO_JOGAR:
-        if (!a)
-        {
-            printf("\n\nOpcao como jogar\n\n");
-            a = 1;
-        }
-
+        PrintScreenHowtoPlay(game);
+        game->state_screen = SCREEN_MENU;
         break;
 
     case SCREEN_RUNNING:
@@ -68,8 +65,7 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     case SCREEN_LEVEL_FINISHED:
 
         player->score += CalculateScore(level_info, player);
-        //player->score = 12;
-        AddPlayerRanking(player, level_info, game);
+        AddPlayerRanking(player, game);
 
         if (player->level < MAX_LEVELS - 1)
         {
@@ -90,13 +86,13 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_GAME_OVER:
-        AddPlayerRanking(player, level_info, game);
+        AddPlayerRanking(player, game);
         PrintScreenGameOver(game);
         game->state_screen = SCREEN_MENU;
         break;
 
     case SCREEN_FECHAR_JOGO:
-        save_game = CloseGame(game, player, level_info);
+        save_game = CloseGame(game);
         if (save_game)
             SaveGame(game, player, level_info);
         exit_game = 1;
@@ -110,7 +106,7 @@ void GameInit(GAME *game)
     game->state_screen = SCREEN_MENU;
 }
 
-int CloseGame(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
+int CloseGame(GAME *game)
 {
     int ch;
     int i = 23;
@@ -135,7 +131,7 @@ int CloseGame(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     while ((ch = wgetch(game->window)) != ENTER)
     {
         mvwprintw(game->window, 6, i, "%s", menu_list[(i % 23) ? 1 : 0]);
-        // use a variable to increment or decrement the value based on the input.
+
         switch (ch)
         {
         case KEY_LEFT:
@@ -147,7 +143,7 @@ int CloseGame(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
             i = 34;
             break;
         }
-        // now highlight the next item in the list.
+
         wattron(game->window, A_STANDOUT);
 
         mvwprintw(game->window, 6, i, "%s", menu_list[(i % 23) ? 1 : 0]);
@@ -176,18 +172,26 @@ void SaveGame(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 int ReadSavedGame(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
     FILE *arq;
+    int state;
 
     arq = fopen("/home/robert/Documents/UFRGS/Semestre_2/Algoritmos_e_Prog/trabalho_final/candy-crush-game/files_game/saved_game.bin", "rb");
 
-    fread(level_info, sizeof(LEVEL_INFO), 1, arq);
+    if (arq == NULL)
+        state = 0;
+    else
+    {
+        fread(level_info, sizeof(LEVEL_INFO), 1, arq);
 
-    fread(player, sizeof(PLAYER), 1, arq);
+        fread(player, sizeof(PLAYER), 1, arq);
 
-    fread(game, sizeof(GAME), 1, arq);
+        fread(game, sizeof(GAME), 1, arq);
 
-    fclose(arq);
+        fclose(arq);
 
-    return 1;
+        state = 1;
+    }
+
+    return state;
 }
 
 void PrintScreenGameComplete(GAME *game)
@@ -219,9 +223,6 @@ void PrintScreenGameComplete(GAME *game)
 
 void PrintScreenGameOver(GAME *game)
 {
-    werase(game->window);
-    wrefresh(game->window);
-
     game->window = CreateNewWindow(54, 180, 15, 1);
 
     int start_line = 15;
@@ -264,4 +265,31 @@ void PrintScreenLevelComplete(GAME *game)
     wrefresh(game->window);
 
     delay_output(3000);
+}
+
+void PrintScreenHowtoPlay(GAME *game)
+{
+    werase(game->window);
+    wrefresh(game->window);
+
+    game->window = CreateNewWindow(54, 180, 15, 1);
+
+    int start_line = 15;
+    int start_column = 40;
+    int ch;
+
+    mvwprintw(game->window, ++start_line, start_column, "O objetivo do jogo eh combinar verticalmente 3 pecas em uma coluna ou horizontalmente 3 pecas em uma linha.");
+    mvwprintw(game->window, ++start_line, start_column, "O jogador deve trocar a posicao entre duas pecas para que se forme uma combinacao.");
+    mvwprintw(game->window, ++start_line, start_column, "Ao se formar uma combinacao, ela eh eliminada da tela, atribuindo uma pontuacao para o jogador.");
+    mvwprintw(game->window, ++start_line, start_column, "O jogo eh estruturado em niveis.");
+    mvwprintw(game->window, ++start_line, start_column, "Dependendo do nivel, o jogador tem um limite de jogadas que ele pode fazer ou um determinado tempo");
+    mvwprintw(game->window, ++start_line, start_column, "para fazer um certo numero de pontos para poder passar para o proximo nivel, e essa dificuldade aumenta gradativamente.");
+    mvwprintw(game->window, ++start_line, start_column, "Durante cada nivel, o jogador obtem um score calculado com base no tempo gasto para terminar cada nivel.");
+    mvwprintw(game->window, ++start_line, start_column, "Para mover o cursor, o jogador pode usar as setas ou as teclas w, s, a, d do teclado.");
+    mvwprintw(game->window, ++start_line, start_column, "Para selecionar a peca, o jogador deve usar a tecla espaco.");
+
+    wrefresh(game->window);
+
+    while ((ch = wgetch(game->window)) != 10)
+        ;
 }

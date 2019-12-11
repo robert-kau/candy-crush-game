@@ -70,14 +70,13 @@ int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 
     PrintCursorMatrix(game, (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->lin) + POS_TAB_LIN - 1), (((sqrt(PIXELS_PIECE) + SPACE_SIZE) * level_info->col) + POS_TAB_COL - 1));
 
-    keypad(game->window, TRUE); // enable keyboard input for the window.
-    curs_set(0);                // hide the default screen cursor.
+    keypad(game->window, TRUE);
+    curs_set(0);
 
     nodelay(game->window, TRUE);
 
     UpdateTime(game, level_info, player);
 
-    //while (1)
     while (((level_info->ch = wgetch(game->window)) != ESC) && level_info->time_left > 0 &&
            level_info->n_combintions < level_info->combinations_next_level)
     {
@@ -271,13 +270,9 @@ void UpdateMatrixScreen(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     keypad(game->window, TRUE);
 
     mvwprintw(game->window, 2, 8, "Jogador: %s", player->name);
-    mvwprintw(game->window, 3, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
-    //mvwprintw(game->window, 4, 8, "Linha: %d", level_info->lin);
-    //mvwprintw(game->window, 5, 8, "Coluna: %d", level_info->col);
+    mvwprintw(game->window, 4, 8, "Combinacoes para proximo nivel: %d", level_info->combinations_next_level);
     mvwprintw(game->window, 6, 8, "Score: %d", CalculateScore(level_info, player));
-    //mvwprintw(game->window, 7, 8, "Lin-col: %c", level_info->tabuleiro[level_info->lin][level_info->col]);
-    //mvwprintw(game->window, 8, 8, "Lin-col-first: %c", level_info->tabuleiro[level_info->first_select_lin][level_info->first_select_col]);
-    mvwprintw(game->window, 9, 8, "Combinacoe feitas: %d", level_info->n_combintions);
+    mvwprintw(game->window, 8, 8, "Combinacoe feitas: %d", level_info->n_combintions);
 
     PrintColorMatrix(game, level_info->tabuleiro);
 
@@ -334,14 +329,13 @@ void FindCombinationMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                         level_info->tabuleiro[lin + 2][col] = EMPTY;
                         level_info->n_combintions++;
                         CompleteMatrix(game, player, level_info);
-                        //CompleteMatrix(game, player, level_info);
                     }
         }
 }
 
 void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
-    int lin, col, lin_aux = 0, lin_aux2 = 0, aux_piece, flag_empty = 1;
+    int lin, col, lin_aux2 = 0, aux_piece, flag_empty = 1;
 
     for (col = EDGE; col < MAP_COL - EDGE; col++)
     {
@@ -358,8 +352,6 @@ void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                         level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
                         level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
 
-                        //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-
                         UpdateMatrixScreen(game, player, level_info);
 
                         delay_output(250);
@@ -373,66 +365,6 @@ void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                     flag_empty = 1;
 
         } while (flag_empty);
-        /*
-        for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
-        {
-            if (level_info->tabuleiro[lin][col] == 'Z')
-            {
-                for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
-                {
-                    aux_piece = level_info->tabuleiro[lin_aux2][col];
-                    level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-                    level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
-
-                    //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-
-                    UpdateMatrixScreen(game, player, level_info);
-
-                    delay_output(250);
-                }
-                level_info->tabuleiro[lin_aux2][col] = RandomPiece();
-            }
-        }
-
-        for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
-        {
-            if (level_info->tabuleiro[lin][col] == 'Z')
-            {
-                for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
-                {
-                    aux_piece = level_info->tabuleiro[lin_aux2][col];
-                    level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-                    level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
-
-                    //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-
-                    UpdateMatrixScreen(game, player, level_info);
-
-                    delay_output(250);
-                }
-                level_info->tabuleiro[lin_aux2][col] = RandomPiece();
-            }
-        }
-
-        for (lin = MAP_LINES - 1; lin >= EDGE; lin--)
-        {
-            if (level_info->tabuleiro[lin][col] == 'Z')
-            {
-                for (lin_aux2 = lin; lin_aux2 > EDGE; lin_aux2--)
-                {
-                    aux_piece = level_info->tabuleiro[lin_aux2][col];
-                    level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-                    level_info->tabuleiro[lin_aux2 - 1][col] = aux_piece;
-
-                    //level_info->tabuleiro[lin_aux2][col] = level_info->tabuleiro[lin_aux2 - 1][col];
-
-                    UpdateMatrixScreen(game, player, level_info);
-
-                    delay_output(250);
-                }
-                level_info->tabuleiro[lin_aux2][col] = RandomPiece();
-            }
-        }*/
     }
     FindCombinationMatrix(game, player, level_info);
 }
@@ -453,7 +385,7 @@ char RandomPiece(void)
     if (500 <= n_rand && n_rand < 750)
         rand_piece = 'B';
 
-    if (750 <= n_rand && n_rand < 1000)
+    if (750 <= n_rand && n_rand <= 1000)
         rand_piece = 'C';
 
     return rand_piece;
@@ -461,7 +393,7 @@ char RandomPiece(void)
 
 int UpdateTime(GAME *game, LEVEL_INFO *level_info, PLAYER *player)
 {
-    int time_aux, there_is_time, time_aux2;
+    int time_aux, there_is_time;
 
     time_aux = (level_info->time_start + TIME_FIRST_LEVEL + (player->level * TIME_OTHER_LEVEL)) - time(NULL);
 
@@ -475,8 +407,12 @@ int UpdateTime(GAME *game, LEVEL_INFO *level_info, PLAYER *player)
 
     if (game->state_screen == SCREEN_RUNNING)
     {
+        if (level_info->time_left > 10)
+            wattron(game->window, COLOR_PAIR(WHITE));
+        else
+            wattron(game->window, COLOR_PAIR(RED));
+
         mvwprintw(game->window, 10, 8, "Tempo restante: %3ds", level_info->time_left);
-        //mvwprintw(game->window, 11, 8, "Tempo r: %3ds", level_info->time_rest);
         wrefresh(game->window);
     }
 
@@ -489,14 +425,13 @@ int CalculateScore(LEVEL_INFO *level_info, PLAYER *player)
 
     seconds = TIME_FIRST_LEVEL + (player->level * TIME_OTHER_LEVEL) - level_info->time_left;
 
-    points = 5000 + (level_info->n_combintions * POINTS_FOR_COMB) - (POINTS_FOR_S * seconds);
+    points = INIT_SCORE_LEVEL + (level_info->n_combintions * POINTS_FOR_COMB) - (POINTS_FOR_S * seconds);
 
     if (points < 0)
         points = 0;
 
-    if (points >= 5000)
-        points = 5000;
+    if (points >= INIT_SCORE_LEVEL)
+        points = INIT_SCORE_LEVEL;
 
     return points;
-    //return seconds;
 }
