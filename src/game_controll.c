@@ -14,7 +14,7 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
     int exit_game = 0, state_game, save_game;
 
-    switch (game->state_screen)
+    switch (game->state_screen) //maquina de estados geral do jogo
     {
     case SCREEN_MENU:
         MenuScreen(game);
@@ -26,12 +26,12 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_CONTINUAR:
-        if (level_info->time_start != 0)
+        if (level_info->time_start != 0) //se ja tiver um jogo em andamento
             game->state_screen = SCREEN_RUNNING;
         else if (ReadSavedGame(game, player, level_info))
             game->state_screen = SCREEN_RUNNING;
         else
-            game->state_screen = SCREEN_MENU;
+            game->state_screen = SCREEN_MENU; //se nao existir arquivo de jogo salvo nem jogo em andamento, volta para menu
         break;
 
     case SCREEN_RANKING:
@@ -47,7 +47,6 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_RUNNING:
-
         state_game = GameRunning(game, player, level_info);
 
         if (state_game == GAME_PAUSE)
@@ -63,7 +62,6 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         break;
 
     case SCREEN_LEVEL_FINISHED:
-
         player->score += CalculateScore(level_info, player);
         AddPlayerRanking(player, game);
 
@@ -93,7 +91,7 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 
     case SCREEN_FECHAR_JOGO:
         save_game = CloseGame(game);
-        if (save_game)
+        if (save_game) //se o jogador responder que quer salvar o jogo, ele deve ser salvo
             SaveGame(game, player, level_info);
         exit_game = 1;
         break;
@@ -101,7 +99,7 @@ int GameScreenControll(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
     return exit_game;
 }
 
-void GameInit(GAME *game)
+void GameInit(GAME *game) // inicia jogo na tela de menu
 {
     game->state_screen = SCREEN_MENU;
 }

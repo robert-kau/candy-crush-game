@@ -8,14 +8,15 @@
 #include <time.h>
 #include "inc/manager_keyboard.h"
 
+//funcao de inicializacao geral do jogo, onde ocorrem atibuicao de valores iniciais as variaveis
 void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
 
-    if (game->state_screen == SCREEN_NOVO_JOGO)
+    if (game->state_screen == SCREEN_NOVO_JOGO) //inicia na tela novo jogo
     {
         echo();
 
-        game->window = CreateNewWindow(7, 40, 90, 1);
+        game->window = CreateNewWindow(7, 40, 90, 1); // cria tela para exibicao
         mvwprintw(game->window, 2, 8, "Digite o nome do jogador");
         mvwprintw(game->window, 4, 2, "->");
         wrefresh(game->window);
@@ -50,7 +51,7 @@ void NewGameInit(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 
 int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 {
-    if (level_info->time_calib > 0)
+    if (level_info->time_calib > 0) //se o jogo ja esta rodando
     {
         level_info->time_start = time(NULL);
 
@@ -77,7 +78,7 @@ int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
 
     UpdateTime(game, level_info, player);
 
-    while (((level_info->ch = wgetch(game->window)) != ESC) && level_info->time_left > 0 &&
+    while (((level_info->ch = wgetch(game->window)) != ESC) && level_info->time_left > 0 && // controle de teclas do jogo
            level_info->n_combintions < level_info->combinations_next_level)
     {
         UpdateTime(game, level_info, player);
@@ -110,7 +111,7 @@ int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         case SPACE:
             level_info->n_space++;
 
-            if (level_info->n_space >= 2)
+            if (level_info->n_space >= 2) //se duas pecas foram selecionadas, troca de posicao
             {
                 level_info->n_space = 0;
                 ChangePositionInMatrix(level_info);
@@ -154,6 +155,7 @@ int GameRunning(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
         return GAME_PAUSE;
 }
 
+//funcao de leitura do arquivo do tabuleiro
 void ReadFileLevel(PLAYER *player, LEVEL_INFO *level_info)
 {
     FILE *arq;
@@ -364,11 +366,12 @@ void CompleteMatrix(GAME *game, PLAYER *player, LEVEL_INFO *level_info)
                 if (level_info->tabuleiro[lin][col] == EMPTY)
                     flag_empty = 1;
 
-        } while (flag_empty);
+        } while (flag_empty); //roda funcao de preenchimento da matrix enquanto houver espacos em branco
     }
     FindCombinationMatrix(game, player, level_info);
 }
 
+//gera peca aleatoria para o tabuleiro
 char RandomPiece(void)
 {
     int n_rand;
